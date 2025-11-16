@@ -1,0 +1,2 @@
+https://github.com/kasperific/HTML5ChromaKey
+https://medium.com/@mominaman/stream-webcam-to-wsl-opencv-983e90ed7301
