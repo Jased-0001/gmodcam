@@ -3,20 +3,25 @@
 <html>
     <head>
         <meta charset="utf-8">
+
         <script>
-            function DrawVideoOnCanvas() {
-                var object = document.getElementById("videodata")
-                var width = object.width;
-                var height = object.height;
+            function start() {
+                var object = document.getElementById('videodata')
+                var width = object.width * 4;
+                var height = object.height * 4;
                 var canvas = document.getElementById("videoscreen");
+
                 canvas.setAttribute('width', width);
                 canvas.setAttribute('height', height);
+                var context;
                 if (canvas.getContext) {
-                    var context = canvas.getContext('2d');
+                    context = canvas.getContext('2d', { willReadFrequently: true });
+                }
+
+                object.onload = function () {
                     context.drawImage(object, 0, 0, width, height);
                     imgDataNormal = context.getImageData(0, 0, width, height);
                     var imgData = context.createImageData(width, height);
-
                     for (i = 0; i < imgData.width * imgData.height * 4; i += 4) {
                         var r = imgDataNormal.data[i + 0];
                         var g = imgDataNormal.data[i + 1];
@@ -72,27 +77,23 @@
                             }
                         }
                     }
+
                     context.putImageData(imgData, 0, 0);
                 }
+
+                setInterval(() => {
+                    if (!object.src.includes('?')) {
+                        object.src = `${object.src}?${Date.now()}`;
+                    } else {
+                        object.src =
+                        object.src.slice(0, object.src.indexOf('?') + 1) +
+                        Date.now();
+                    }
+                }, 15);
             }
         </script>
-        <script>
-            setInterval(() => {
-                DrawVideoOnCanvas();
-                
-                var image = document.getElementById('videodata')
-
-                if (!image.src.includes('?')) {
-                    image.src = `${image.src}?${Date.now()}`;
-                } else {
-                    image.src =
-                    image.src.slice(0, image.src.indexOf('?') + 1) +
-                    Date.now();
-                }
-            }, 100);
-        </script>
     </head>
-    <body>
+    <body onload="start()">
         <div id="wrapper">
             <div id="output">
                 <canvas id="videoscreen">
@@ -100,7 +101,7 @@
                 </canvas>
             </div>
             <div id="source">
-                <img id="videodata" src="http://127.0.0.1:8080/frame" style="display:none">  
+                <img id="videodata" src="http://69.221.118.72:8080/frame" style="display:none">  
             </div>
         </div>
 

@@ -6,8 +6,9 @@ import time
 app = Flask(__name__)
 camera = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
+width, height = 320, 240
 #width, height = 640, 480
-width, height = 960, 720
+#width, height = 960, 720
 
 content_type, filetype = "image/jpg", ".jpg"
 
@@ -28,7 +29,7 @@ def generate_frame():
     success, frame = camera.read()
     if not success:
         raise Exception("NOT SUCCESS " + success)
-    _, buffer = cv2.imencode(filetype, frame, )
+    _, buffer = cv2.imencode(filetype, frame, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
     a = buffer.tobytes()
     end = time.time()
     print(f"Frametime: {end-start} - Size: {len(a)}")
