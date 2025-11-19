@@ -1,0 +1,30 @@
+# # #
+# Options
+
+
+camera_index: 0
+port: 8080
+host: '0.0.0.0'
+flask_debug: False
+
+# # #
+# Resolution options
+
+#width:  320
+#height: 240  # 240p (4:3)
+
+#width:  640
+#height: 480  # 480p (4:3)
+
+width:  960
+height: 720  # 720p (4:3)
+
+#width:  1280
+#height: 1080 # 1080p (4:3)
+
+
+# # # 
+# Image settings
+
+content_type: "image/jpeg" # https://www.iana.org/assignments/media-types/media-types.xhtml#image
+filetype: ".jpeg"

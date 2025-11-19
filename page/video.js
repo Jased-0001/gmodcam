@@ -29,6 +29,10 @@ function start() {
         status.innerHTML ='<span style="color:red;">HELP ME! HELP ME!</span>'
     });
 
+    socket.on("connect_error", (err) => {
+        status.innerHTML = '<span style="color:red;">Connection failed: ' + err.message + ' (is someone connected?)</span>';
+    });
+
     socket.on('frame', function (data) {
         //console.log('Server says: ' + data);
         object.src = data;
@@ -47,13 +51,7 @@ function start() {
             var g = imgDataNormal.data[i + 1];
             var b = imgDataNormal.data[i + 2];
             var a = imgDataNormal.data[i + 3];
-            // set rgb levels for green and set alphachannel to 0;
-
-            // i have no idea how this works but #04f731 works for the chroma key
-            selectedR = 25;
-            selectedG = 250;
-            selectedB = 25;
-            if (r <= selectedR && g >= selectedG && b >= selectedB) {
+            if (g > 150 && g > r && g > b) {
                 a = 0;
             }
             if (a != 0) {
@@ -100,7 +98,6 @@ function start() {
         //    }
         //}
 
-        
         context.putImageData(imgData, 0, 0);
     }
 
