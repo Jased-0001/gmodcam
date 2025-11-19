@@ -3,107 +3,17 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <title>Campage</title>
 
-        <script>
-            function start() {
-                var object = document.getElementById('videodata')
-                var width = object.width * 4;
-                var height = object.height * 4;
-                var canvas = document.getElementById("videoscreen");
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js" integrity="sha512-8BHxHDLsOHx+flIrQ0DrZcea7MkHqRU5GbTHmbdzMRnAaoCIkZ97PqZcXJkKZckMMhqfoeaJE+DNUVuyoQsO3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-                canvas.setAttribute('width', width);
-                canvas.setAttribute('height', height);
-                var context;
-                if (canvas.getContext) {
-                    context = canvas.getContext('2d', { willReadFrequently: true });
-                }
-
-                object.onload = function () {
-                    context.drawImage(object, 0, 0, width, height);
-                    imgDataNormal = context.getImageData(0, 0, width, height);
-                    var imgData = context.createImageData(width, height);
-                    for (i = 0; i < imgData.width * imgData.height * 4; i += 4) {
-                        var r = imgDataNormal.data[i + 0];
-                        var g = imgDataNormal.data[i + 1];
-                        var b = imgDataNormal.data[i + 2];
-                        var a = imgDataNormal.data[i + 3];
-                        // set rgb levels for green and set alphachannel to 0;
-                        selectedR = 110;
-                        selectedG = 154;
-                        selectedB = 90;
-                        if (r <= selectedR && g >= selectedG && b >= selectedB) {
-                            a = 0;
-                        }
-                        if (a != 0) {
-                            imgData.data[i + 0] = r;
-                            imgData.data[i + 1] = g;
-                            imgData.data[i + 2] = b;
-                            imgData.data[i + 3] = a;
-                        }
-                    }
-                    // For image anti-aliasing
-                    for (var y = 0; y < imgData.height; y++) {
-                        for (var x = 0; x < imgData.width; x++) {
-                            var r = imgData.data[((imgData.width * y) + x) * 4];
-                            var g = imgData.data[((imgData.width * y) + x) * 4 + 1];
-                            var b = imgData.data[((imgData.width * y) + x) * 4 + 2];
-                            var a = imgData.data[((imgData.width * y) + x) * 4 + 3];
-                            if (imgData.data[((imgData.width * y) + x) * 4 + 3] != 0) {
-                                offsetYup = y - 1;
-                                offsetYdown = y + 1;
-                                offsetXleft = x - 1;
-                                offsetxRight = x + 1;
-                                var change = false;
-                                if (offsetYup > 0) {
-                                    if (imgData.data[((imgData.width * (y - 1)) + (x)) * 4 + 3] == 0) {
-                                        change = true;
-                                    }
-                                }
-                                if (offsetYdown < imgData.height) {
-                                    if (imgData.data[((imgData.width * (y + 1)) + (x)) * 4 + 3] == 0) {
-                                        change = true;
-                                    }
-                                }
-                                if (offsetXleft > -1) {
-                                    if (imgData.data[((imgData.width * y) + (x - 1)) * 4 + 3] == 0) {
-                                        change = true;
-                                    }
-                                }
-                                if (offsetxRight < imgData.width) {
-                                    if (imgData.data[((imgData.width * y) + (x + 1)) * 4 + 3] == 0) {
-                                        change = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    context.putImageData(imgData, 0, 0);
-                }
-
-                setInterval(() => {
-                    if (!object.src.includes('?')) {
-                        object.src = `${object.src}?${Date.now()}`;
-                    } else {
-                        object.src =
-                        object.src.slice(0, object.src.indexOf('?') + 1) +
-                        Date.now();
-                    }
-                }, 15);
-            }
-        </script>
+        <script src="/video.js"></script>
     </head>
     <body onload="start()">
-        <div id="wrapper">
-            <div id="output">
-                <canvas id="videoscreen">
-                    <p>Sorry your browser does not support HTML5</p>
-                </canvas>
-            </div>
-            <div id="source">
-                <img id="videodata" src="http://69.221.118.72:8080/frame" style="display:none">  
-            </div>
-        </div>
-
+        <h1 id="status">Hello!</h1>
+        <canvas id="videoscreen">
+            <p>Sorry your browser does not support HTML5</p>
+        </canvas>
+        <img id="videodata" src="http://69.221.118.72:8080/frame" style="display:none;"> 
     </body>
 </html>
