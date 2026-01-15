@@ -4,6 +4,7 @@ import cv2
 import atexit
 from base64 import b64encode
 from yaml import load,Loader
+import time
 
 with open("config.yaml", "r") as f:
     config = load(stream=f, Loader=Loader)
@@ -11,26 +12,39 @@ with open("config.yaml", "r") as f:
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-client = False
+camera = None
 
-camera = cv2.VideoCapture(config["camera_index"], cv2.CAP_DSHOW)
+def setup_camera(index = config["camera_index"]):
+    global camera
 
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, config["width"])
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, config["height"])
+    if camera:
+        camera.release()
 
-if not camera.isOpened():
-    raise RuntimeError("Failed to open webcam")
+    camera = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+
+    camera.set(cv2.CAP_PROP_FRAME_WIDTH, config["width"])
+    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, config["height"])
+
+    if not camera.isOpened():
+        raise RuntimeError("Failed to open webcam")
 
 @atexit.register
 def cleanup():
-    print("Releasing camera")
-    camera.release()
+    if camera:
+        print("Releasing camera")
+        camera.release()
 
 def generate_frame():
-    success, frame = camera.read()
+    start = time.time()
+    if camera:
+        success, frame = camera.read()
+    else:
+        return False
     if not success:
         return False
-    _, buffer = cv2.imencode(config["filetype"], frame)
+    _, buffer = cv2.imencode(config["filetype"], frame, [cv2.IMWRITE_JPEG_QUALITY, 100])
+    end = time.time()
+    print(f"Frametime {round(end-start,5)}\r",end="")
     return buffer
 
 @app.route('/')
@@ -50,23 +64,18 @@ def frame():
 
 @socketio.on('connect')
 def handle_connect():
-    global client
-    if client:
-        return False
-    else:
-        print('Client connected')
-        client = True
+    print('Client connected')
+
 @socketio.on('disconnect')
 def handle_connect():
-    global client
     print('Client disconnected')
-    client = False
 
-@socketio.on('message')
-def handle_message(_):
-    socketio.emit('frame', f'data:{config["content_type"]};base64,{b64encode(generate_frame()).decode()}')
+@socketio.on('frame')
+def handle_message(sid):
+    socketio.emit("frame", f'data:{config["content_type"]};base64,{b64encode(generate_frame()).decode()}', to=sid)
 
 
 if __name__ == '__main__':
     #app.run(host='0.0.0.0', port=8080, threaded=True)
+    setup_camera()
     socketio.run(app, host=config["host"], port=config["port"], debug=config["flask_debug"])

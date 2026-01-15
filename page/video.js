@@ -5,7 +5,7 @@ var scale = 1;
 function start() {
     var canvas = document.getElementById("videoscreen");
     var object = document.getElementById('videodata');
-    var status = document.getElementById("status");
+    var statuse = document.getElementById("status");
 
     var width = object.width * scale;
     var height = object.height * scale;
@@ -22,24 +22,24 @@ function start() {
 
 
     socket.on('connect', function () {
-        status.innerText = '';
+        statuse.innerText = '';
+
+        socket.emit("frame", socket.sid);
     });
 
     socket.on('disconnect', function () {
-        status.innerHTML ='<span style="color:red;">HELP ME! HELP ME!</span>'
+        statuse.innerHTML ='<span style="color:red;">HELP ME! HELP ME!</span>';
     });
 
     socket.on("connect_error", (err) => {
-        status.innerHTML = '<span style="color:red;">Connection failed: ' + err.message + ' (is someone connected?)</span>';
+        statuse.innerHTML = '<span style="color:red;">WHAT? HELP ME! Connection failed: ' + err.message + '</span>';
     });
 
     socket.on('frame', function (data) {
         //console.log('Server says: ' + data);
         object.src = data;
-
-        socket.send('frame');
+        socket.emit("frame", socket.id);
     });
-
 
     //https://github.com/kasperific/HTML5ChromaKey
     object.onload = function () {
@@ -61,47 +61,9 @@ function start() {
                 imgData.data[i + 3] = a;
             }
         }
-        // For image anti-aliasing
-        //for (var y = 0; y < imgData.height; y++) {
-        //    for (var x = 0; x < imgData.width; x++) {
-        //        var r = imgData.data[((imgData.width * y) + x) * 4];
-        //        var g = imgData.data[((imgData.width * y) + x) * 4 + 1];
-        //        var b = imgData.data[((imgData.width * y) + x) * 4 + 2];
-        //        var a = imgData.data[((imgData.width * y) + x) * 4 + 3];
-        //        if (imgData.data[((imgData.width * y) + x) * 4 + 3] != 0) {
-        //            offsetYup = y - 1;
-        //            offsetYdown = y + 1;
-        //            offsetXleft = x - 1;
-        //            offsetxRight = x + 1;
-        //            var change = false;
-        //            if (offsetYup > 0) {
-        //                if (imgData.data[((imgData.width * (y - 1)) + (x)) * 4 + 3] == 0) {
-        //                    change = true;
-        //                }
-        //            }
-        //            if (offsetYdown < imgData.height) {
-        //                if (imgData.data[((imgData.width * (y + 1)) + (x)) * 4 + 3] == 0) {
-        //                    change = true;
-        //                }
-        //            }
-        //            if (offsetXleft > -1) {
-        //                if (imgData.data[((imgData.width * y) + (x - 1)) * 4 + 3] == 0) {
-        //                    change = true;
-        //                }
-        //            }
-        //            if (offsetxRight < imgData.width) {
-        //                if (imgData.data[((imgData.width * y) + (x + 1)) * 4 + 3] == 0) {
-        //                    change = true;
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
 
         context.putImageData(imgData, 0, 0);
     }
-
-    socket.send('frame');
 }
 
             

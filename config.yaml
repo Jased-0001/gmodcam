@@ -2,7 +2,7 @@
 # Options
 
 
-camera_index: 0
+camera_index: 1
 port: 8080
 host: '0.0.0.0'
 flask_debug: False
@@ -16,11 +16,14 @@ flask_debug: False
 #width:  640
 #height: 480  # 480p (4:3)
 
-width:  960
-height: 720  # 720p (4:3)
+#width:  960
+#height: 720  # 720p (4:3)
 
-#width:  1280
-#height: 1080 # 1080p (4:3)
+# width:  1280
+# height: 1080 # 1080p (4:3)
+
+width:  1080
+height: 1920 # 1080p
 
 
 # # # 
