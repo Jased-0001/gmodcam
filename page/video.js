@@ -1,14 +1,19 @@
 var socket = io.connect('http://' + window.location.host);
+var frameinterval;
 
-var scale = 1;
+//var starttime, endtime;
+//var framecount = 0;
+//var frametime = 0;
+
+var targetfps = 20; // how many times should frames be requested per second
 
 function start() {
     var canvas = document.getElementById("videoscreen");
     var object = document.getElementById('videodata');
     var statuse = document.getElementById("status");
-
-    var width = object.width * scale;
-    var height = object.height * scale;
+    var width,height;
+    var width = object.width;
+    var height = object.height;
 
 
     canvas.setAttribute('width', width);
@@ -24,25 +29,35 @@ function start() {
     socket.on('connect', function () {
         statuse.innerText = '';
 
-        socket.emit("frame", socket.sid);
+        frameinterval = setInterval(function() {
+            socket.emit("frame", socket.id);
+
+            //starttime = new Date().getTime();
+        },1000 / targetfps);
     });
 
     socket.on('disconnect', function () {
         statuse.innerHTML ='<span style="color:red;">HELP ME! HELP ME!</span>';
+        if(frameinterval) {clearInterval(frameinterval); frameinterval=null;}
     });
 
     socket.on("connect_error", (err) => {
         statuse.innerHTML = '<span style="color:red;">WHAT? HELP ME! Connection failed: ' + err.message + '</span>';
+        if(frameinterval) {clearInterval(frameinterval); frameinterval=null;}
     });
 
     socket.on('frame', function (data) {
         //console.log('Server says: ' + data);
         object.src = data;
-        socket.emit("frame", socket.id);
     });
 
     //https://github.com/kasperific/HTML5ChromaKey
     object.onload = function () {
+        //endtime = new Date().getTime();
+        //framecount++;
+        //frametime += endtime - starttime;
+        //statuse.innerHTML = `took ${endtime-starttime}ms to get frame avg ${Math.round(frametime/framecount)}`;
+
         context.drawImage(object, 0, 0, width, height);
         imgDataNormal = context.getImageData(0, 0, width, height);
         var imgData = context.createImageData(width, height);

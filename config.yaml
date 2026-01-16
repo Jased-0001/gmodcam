@@ -19,11 +19,11 @@ flask_debug: False
 #width:  960
 #height: 720  # 720p (4:3)
 
-# width:  1280
-# height: 1080 # 1080p (4:3)
+width:  1280
+height: 1080 # 1080p (4:3)
 
-width:  1080
-height: 1920 # 1080p
+#width:  1920
+#height: 1080 # 1080p
 
 
 # # # 
