@@ -1,20 +1,20 @@
 var socket = io.connect('http://' + window.location.host);
 var frameinterval;
+var framefreeze = false;
 
-//var starttime, endtime;
-//var framecount = 0;
-//var frametime = 0;
+var starttime, endtime;
+var framecount = 0;
+var frametime = 0;
 
-var targetfps = 20; // how many times should frames be requested per second
+var targetfps = 60; // how many times should frames be requested per second (if possible)
 
 function start() {
     var canvas = document.getElementById("videoscreen");
     var object = document.getElementById('videodata');
     var statuse = document.getElementById("status");
-    var width,height;
+
     var width = object.width;
     var height = object.height;
-
 
     canvas.setAttribute('width', width);
     canvas.setAttribute('height', height);
@@ -30,9 +30,11 @@ function start() {
         statuse.innerText = '';
 
         frameinterval = setInterval(function() {
-            socket.emit("frame", socket.id);
-
-            //starttime = new Date().getTime();
+            if (!framefreeze) {                  // if we aren't drawing anything
+                socket.emit("frame", socket.id); // get something to draw
+                framefreeze = true;              // and don't get any more in the meantime
+                starttime = new Date().getTime();
+            }
         },1000 / targetfps);
     });
 
@@ -53,11 +55,6 @@ function start() {
 
     //https://github.com/kasperific/HTML5ChromaKey
     object.onload = function () {
-        //endtime = new Date().getTime();
-        //framecount++;
-        //frametime += endtime - starttime;
-        //statuse.innerHTML = `took ${endtime-starttime}ms to get frame avg ${Math.round(frametime/framecount)}`;
-
         context.drawImage(object, 0, 0, width, height);
         imgDataNormal = context.getImageData(0, 0, width, height);
         var imgData = context.createImageData(width, height);
@@ -66,7 +63,7 @@ function start() {
             var g = imgDataNormal.data[i + 1];
             var b = imgDataNormal.data[i + 2];
             var a = imgDataNormal.data[i + 3];
-            if (g > 150 && g > r && g > b) {
+            if ((r <= 100) && (200 <= g) && (b <= 100)) {
                 a = 0;
             }
             if (a != 0) {
@@ -78,6 +75,12 @@ function start() {
         }
 
         context.putImageData(imgData, 0, 0);
+        framefreeze = false;
+
+        endtime = new Date().getTime();
+        framecount++;
+        frametime += endtime - starttime;
+        statuse.innerHTML = `took ${endtime-starttime}ms to get frame avg ${Math.round(frametime/framecount)}`;
     }
 }
 
